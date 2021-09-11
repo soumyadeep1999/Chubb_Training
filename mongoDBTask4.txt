@@ -70,13 +70,10 @@ db.users.aggregate([{$match:{"attandance":{$eq:"Absent"}}},
     ]
 } },
    
-  {
-     $project:
-	{
-	 "_id":0,
-	 "users":1
-	}
-  }
+
+    {
+      $count: "total Users"
+    }
 ])
 
 
