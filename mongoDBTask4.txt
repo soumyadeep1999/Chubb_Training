@@ -1,0 +1,111 @@
+Q1->
+db.users.aggregate([{$match:{"Dates":{$gte:ISODate("2021-10-01"), $lt:ISODate("2021-10-31") }}},
+   
+  {
+     $project:
+	{
+	 "_id":0,
+	 "topics":1,
+	 "tasks":1
+	}
+  }
+])
+
+Q2->
+db.users.aggregate([{$match:{"Dates":{$gte:ISODate("2021-10-15"), $lt:ISODate("2021-10-31") }}},
+   
+  {
+     $project:
+	{
+	 "_id":0,
+	 "companyDrives":1
+	}
+  }
+])
+
+Q3->
+db.users.aggregate([{$match:{"attandance":{$eq:"Present"}}},
+   
+  {
+     $project:
+	{
+	 "_id":0,
+	 "users":1,
+	 "companyDrives":1
+	}
+  }
+])
+
+Q4->db.users.aggregate([{ $group: { _id: null, TotalSum: { $sum: "$codekataSolved" } } } ]);
+
+Q5->
+db.mentor.aggregate([{$match:{"m_cnt":{$gt:15}}},
+   {
+     $lookup:
+       {
+         from: "users",
+         localField: "m_name",
+         foreignField: "mentors",
+         as: "mentorWithMentees"
+       }
+  },
+  {
+      $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ "$mentorWithMentees", 0 ] }, "$$ROOT" ] } }
+   },
+{$match:{"m_cnt":{$gt:15}}},
+{
+       $group:
+         {
+           _id: "$mentors"
+         }
+     }
+])
+
+Q6->
+db.users.aggregate([{$match:{"attandance":{$eq:"Absent"}}},
+{ $match: {
+    $or: [
+        { Dates: { $gte: ISODate("2021-10-31") } },
+        { Dates: { $lte: ISODate("2021-10-01") } }
+    ]
+} },
+   
+  {
+     $project:
+	{
+	 "_id":0,
+	 "users":1
+	}
+  }
+])
+
+
+
+[{"id":1,"users":"Omar","codekataSolved":6,"attandance":"Present","topics":["python","java","cpp","go"],"tasks":["array","constructor","axios"],"companyDrives":"Sapien Cras LLP","mentors":"Illiana Valencia","Dates":ISODate("2021-12-09")},
+{"id":2,"users":"Dale","codekataSolved":5,"attandance":"Absent","topics":["python","node","react","java"],"tasks":["redux","streamlit","props"],"companyDrives":"Sodales Corporation","mentors":"Irma Holder","Dates":ISODate("2021-10-15")},
+{"id":3,"users":"Odysseus","codekataSolved":5,"attandance":"Present","topics":["swift","ruby","react","rust"],"tasks":["constructor","unity","spring"],"companyDrives":"Habitant Morbi Incorporated","mentors":"Noelani Hill","Dates":ISODate("2021-10-25")},
+{"id":4,"users":"Addison","codekataSolved":4,"attandance":"Absent","topics":["cpp","swift","android","csharp"],"tasks":["json","aggregation","dynamic"],"companyDrives":"Interdum Curabitur Dictum Limited","mentors":"Vivien Dodson","Dates":ISODate("2021-10-16")},
+{"id":5,"users":"Colby","codekataSolved":6,"attandance":"Absent","topics":["php","dotnet","java","mongo"],"tasks":["stl","template","servlet"],"companyDrives":"Nunc Quisque PC","mentors":"Autumn Salazar","Dates":ISODate("2021-10-20")},
+{"id":6,"users":"Benedict","codekataSolved":2,"attandance":"Absent","topics":["mysql","python","django","flask"],"tasks":["props","axios","json"],"companyDrives":"Quisque Purus Sapien LLC","mentors":"Blossom Henderson","Dates":ISODate("2021-11-08")},
+{"id":7,"users":"Cairo","codekataSolved":9,"attandance":"Present","topics":["python","node","react","java"],"tasks":["constructor","unity","spring"],"companyDrives":"Odio Tristique Company","mentors":"Paula Patterson","Dates":ISODate("2021-10-12")},
+{"id":8,"users":"Lawrence","codekataSolved":5,"attandance":"Present","topics":["python","java","cpp","go"],"tasks":["array","constructor","axios"],"companyDrives":"Sollicitudin Adipiscing Ligula Inc.","mentors":"Sonia Pacheco","Dates":ISODate("2021-09-04")},
+{"id":9,"users":"Sylvester","codekataSolved":10,"attandance":"Present","topics":["cpp","swift","android","csharp"],"tasks":["array","constructor","axios"],"companyDrives":"Sit Amet Corp.","mentors":"Hedy Bullock","Dates":ISODate("2021-12-06")},
+{"id":10,"users":"Hilel","codekataSolved":1,"attandance":"Present","topics":["php","dotnet","java","mongo"],"tasks":["props","axios","json"],"companyDrives":"Et Consulting","mentors":"Keely Ramos","Dates":ISODate("2021-11-13")}]
+
+
+
+
+db.mentor.insert([{"m_cnt":10,"m_name":"Illiana Valencia"},
+{"m_cnt":5,"m_name":"Irma Holder"},
+{"m_cnt":30,"m_name":"Noelani Hill"}
+,{"m_cnt":16,"m_name":"Vivien Dodson"},
+{"m_cnt":12,"m_name":"Autumn Salazar"},
+{"m_cnt":22,"m_name":"Blossom Henderson"},
+{"m_cnt":9,"m_name":"Paula Patterson"},
+{"m_cnt":27,"m_name":"Sonia Pacheco"},
+{"m_cnt":14,"m_name":"Hedy Bullock"},
+{"m_cnt":35,"m_name":"Keely Ramos"}]).pretty();
+
+
+
+
