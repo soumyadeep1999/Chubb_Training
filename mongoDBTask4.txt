@@ -62,23 +62,40 @@ db.mentor.aggregate([{$match:{"m_cnt":{$gt:15}}},
 ])
 
 Q6->
-db.users.aggregate([{$match:{"attandance":{$eq:"Absent"}}},
-{ $match: {
+db.task.aggregate([{ $match: {
     $or: [
-        { Dates: { $gte: ISODate("2021-10-31") } },
-        { Dates: { $lte: ISODate("2021-10-01") } }
+        { submission_date: { $gte: ISODate("2021-10-31") } },
+        { submission_date: { $lte: ISODate("2021-10-01") } }
     ]
 } },
-   
-
-    {
+   {
+     $lookup:
+       {
+         from: "users",
+         localField: "all_tasks",
+         foreignField: "tasks",
+         as: "userTask"
+       }
+  },
+  {
+      $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ "$userTask", 0 ] }, "$$ROOT" ] } }
+   },
+{$match:{"attandance":{$eq:"Absent"}}},
+  {
+     $project:
+	{
+	 "_id":0,
+	 "users":1
+	}
+  },
+ {
       $count: "total Users"
     }
 ])
 
 
-
-[{"id":1,"users":"Omar","codekataSolved":6,"attandance":"Present","topics":["python","java","cpp","go"],"tasks":["array","constructor","axios"],"companyDrives":"Sapien Cras LLP","mentors":"Illiana Valencia","Dates":ISODate("2021-12-09")},
+//USERS DOCUMENT
+db.users.insert([{"id":1,"users":"Omar","codekataSolved":6,"attandance":"Present","topics":["python","java","cpp","go"],"tasks":["array","constructor","axios"],"companyDrives":"Sapien Cras LLP","mentors":"Illiana Valencia","Dates":ISODate("2021-12-09")},
 {"id":2,"users":"Dale","codekataSolved":5,"attandance":"Absent","topics":["python","node","react","java"],"tasks":["redux","streamlit","props"],"companyDrives":"Sodales Corporation","mentors":"Irma Holder","Dates":ISODate("2021-10-15")},
 {"id":3,"users":"Odysseus","codekataSolved":5,"attandance":"Present","topics":["swift","ruby","react","rust"],"tasks":["constructor","unity","spring"],"companyDrives":"Habitant Morbi Incorporated","mentors":"Noelani Hill","Dates":ISODate("2021-10-25")},
 {"id":4,"users":"Addison","codekataSolved":4,"attandance":"Absent","topics":["cpp","swift","android","csharp"],"tasks":["json","aggregation","dynamic"],"companyDrives":"Interdum Curabitur Dictum Limited","mentors":"Vivien Dodson","Dates":ISODate("2021-10-16")},
@@ -87,11 +104,11 @@ db.users.aggregate([{$match:{"attandance":{$eq:"Absent"}}},
 {"id":7,"users":"Cairo","codekataSolved":9,"attandance":"Present","topics":["python","node","react","java"],"tasks":["constructor","unity","spring"],"companyDrives":"Odio Tristique Company","mentors":"Paula Patterson","Dates":ISODate("2021-10-12")},
 {"id":8,"users":"Lawrence","codekataSolved":5,"attandance":"Present","topics":["python","java","cpp","go"],"tasks":["array","constructor","axios"],"companyDrives":"Sollicitudin Adipiscing Ligula Inc.","mentors":"Sonia Pacheco","Dates":ISODate("2021-09-04")},
 {"id":9,"users":"Sylvester","codekataSolved":10,"attandance":"Present","topics":["cpp","swift","android","csharp"],"tasks":["array","constructor","axios"],"companyDrives":"Sit Amet Corp.","mentors":"Hedy Bullock","Dates":ISODate("2021-12-06")},
-{"id":10,"users":"Hilel","codekataSolved":1,"attandance":"Present","topics":["php","dotnet","java","mongo"],"tasks":["props","axios","json"],"companyDrives":"Et Consulting","mentors":"Keely Ramos","Dates":ISODate("2021-11-13")}]
+{"id":10,"users":"Hilel","codekataSolved":1,"attandance":"Present","topics":["php","dotnet","java","mongo"],"tasks":["props","axios","json"],"companyDrives":"Et Consulting","mentors":"Keely Ramos","Dates":ISODate("2021-11-13")}])
 
 
 
-
+//MENTOR DOCUMENT
 db.mentor.insert([{"m_cnt":10,"m_name":"Illiana Valencia"},
 {"m_cnt":5,"m_name":"Irma Holder"},
 {"m_cnt":30,"m_name":"Noelani Hill"}
@@ -102,6 +119,15 @@ db.mentor.insert([{"m_cnt":10,"m_name":"Illiana Valencia"},
 {"m_cnt":27,"m_name":"Sonia Pacheco"},
 {"m_cnt":14,"m_name":"Hedy Bullock"},
 {"m_cnt":35,"m_name":"Keely Ramos"}]).pretty();
+
+
+//TASK DOCUMENT
+db.task.insert([{"all_tasks":["array","constructor","axios"],"submission_date":ISODate("2021-12-09")},
+{"all_tasks":["redux","streamlit","props"],"submission_date":ISODate("2021-11-10")},
+{"all_tasks":["constructor","unity","spring"],"submission_date":ISODate("2021-10-05")},
+{"all_tasks":["json","aggregation","dynamic"],"submission_date":ISODate("2021-10-15")},
+{"all_tasks":["stl","template","servlet"],"submission_date":ISODate("2021-05-12")},
+{"all_tasks":["props","axios","json"],"submission_date":ISODate("2021-10-20")},])
 
 
 
